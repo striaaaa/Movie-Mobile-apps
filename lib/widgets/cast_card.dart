@@ -45,7 +45,7 @@ class CastCard extends StatelessWidget {
                   child: const Center(
                     child: CircularProgressIndicator(),
                   ),
-                ),
+                ),//i
                 errorWidget: (context, url, error) => Container(
                   color: Colors.grey[800],
                   child: const Center(
