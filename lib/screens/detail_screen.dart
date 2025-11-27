@@ -64,7 +64,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
           return CustomScrollView(
             slivers: [
-              // Netflix Style App Bar with Backdrop
+              // Style App Bar with Backdrop
               SliverAppBar(
                 expandedHeight: 400,
                 flexibleSpace: FlexibleSpaceBar(

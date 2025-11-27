@@ -167,7 +167,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// MainNavigation tetap sama...
+// MainNavigation
 class MainNavigation extends StatefulWidget {
   const MainNavigation({Key? key}) : super(key: key);
 
