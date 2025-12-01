@@ -57,7 +57,7 @@ class CastCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // Cast Name
+          // Cast Namee
           Text(
             cast.name,
             style: const TextStyle(
