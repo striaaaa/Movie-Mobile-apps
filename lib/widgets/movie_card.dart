@@ -6,16 +6,22 @@ import '../screens/detail_screen.dart';
 class MovieCard extends StatelessWidget {
   final Movie movie;
   final VoidCallback? onTap;
+  final int? rank; // Tambah parameter rank
+  final bool showRank; // Flag untuk rank badge kecil
+  final bool showBackgroundRank; // Flag untuk angka besar di background
 
   const MovieCard({
     Key? key,
     required this.movie,
     this.onTap,
+    this.rank,
+    this.showRank = false,
+    this.showBackgroundRank = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF199EF3);
+    const primaryColor = Color(0xFF199EF3);
 
     return GestureDetector(
       onTap: onTap ??
@@ -45,6 +51,41 @@ class MovieCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
+              if (showBackgroundRank && rank != null && rank! <= 10)
+                Positioned(
+                  left: -25,
+                  top: 0,
+                  bottom: 0,
+                  child: ShaderMask(
+                    shaderCallback: (bounds) {
+                      return LinearGradient(
+                        begin: Alignment.centerRight,
+                        end: Alignment.centerLeft,
+                        colors: [
+                          Colors.black.withOpacity(0.8),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.3, 0.8],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: Container(
+                      width: 120,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '$rank',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 130,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white.withOpacity(0.4),
+                          height: 0.8,
+                          letterSpacing: -8,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               // Movie Poster
               CachedNetworkImage(
                 imageUrl: movie.fullPosterUrl,
@@ -65,14 +106,14 @@ class MovieCard extends StatelessWidget {
                 ),
               ),
 
-              // Gradient Overlay
+              // Gradient Overlay - lebih gelap kalo ada background rank
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.8),
+                      Colors.black.withOpacity(showBackgroundRank ? 0.9 : 0.8),
                       Colors.transparent,
                       Colors.transparent,
                     ],
@@ -80,26 +121,37 @@ class MovieCard extends StatelessWidget {
                 ),
               ),
 
+              // TOP 10 BADGE KECIL (di pojok kiri atas)
+              if (showRank &&
+                  rank != null &&
+                  rank! <= 10 &&
+                  !showBackgroundRank)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: _buildRankBadge(rank!),
+                ),
+
               // Movie Info at Bottom
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(showBackgroundRank ? 16 : 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         movie.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 12,
+                          fontSize: showBackgroundRank ? 14 : 12,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                           height: 1.2,
                         ),
-                        maxLines: 2,
+                        maxLines: showBackgroundRank ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
@@ -134,36 +186,80 @@ class MovieCard extends StatelessWidget {
                 ),
               ),
 
-              // Rating Badge
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+              // BACKGROUND RANK WITH OUTLINE EFFECT
+              if (showBackgroundRank && rank != null && rank! <= 10)
+                Positioned(
+                  left: -5,
+                  top: 50,
+                  bottom: 0,
+                  child: Stack(
                     children: [
-                      const Icon(Icons.star, size: 10, color: Colors.white),
-                      const SizedBox(width: 2),
+                      // Outline shadow
                       Text(
-                        movie.voteAverage.toStringAsFixed(1),
-                        style: const TextStyle(
+                        '$rank',
+                        style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          fontSize: 90,
+                          fontWeight: FontWeight.w900,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 3
+                            ..color = Colors.black.withOpacity(0.3),
+                          height: 0.8,
+                        ),
+                      ),
+                      // Main number
+                      Text(
+                        '$rank',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 90,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white.withOpacity(0.25),
+                          height: 0.8,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Netflix Style Rank Badge (untuk badge kecil)
+  Widget _buildRankBadge(int rank) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF199EF3), // Netflix red
+            Color(0xFF199EF3), // Darker red
+          ],
+        ),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          '$rank',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
           ),
         ),
       ),

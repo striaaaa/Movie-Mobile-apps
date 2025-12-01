@@ -56,8 +56,13 @@ class ApiService {
       final movieResponse = await _dio.get('$_baseUrl/movie/$movieId');
       final creditsResponse =
           await _dio.get('$_baseUrl/movie/$movieId/credits');
+      final videosResponse = await _dio.get('$_baseUrl/movie/$movieId/videos');
 
-      final movie = Movie.fromJson(movieResponse.data);
+      final movieData = movieResponse.data;
+      // Tambah videos data ke movie
+      movieData['videos'] = videosResponse.data;
+
+      final movie = Movie.fromJson(movieData);
       final cast = (creditsResponse.data['cast'] as List)
           .map((json) => Cast.fromJson(json))
           .toList();

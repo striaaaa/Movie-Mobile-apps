@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/movie_model.dart';
 import '../models/cast_model.dart';
 import '../models/favorite_model.dart';
+import '../models/video_model.dart';
 import '../services/api_services.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/shared_prefs_service.dart';
 import '../widgets/cast_card.dart';
+import '../widgets/youtube_player_widget.dart';
 
 class DetailScreen extends StatefulWidget {
   final int movieId;
@@ -40,7 +43,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF199EF3);
+    const primaryColor = Color(0xFF199EF3);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -61,10 +64,11 @@ class _DetailScreenState extends State<DetailScreen> {
 
           final movie = snapshot.data!['movie'] as Movie;
           final cast = snapshot.data!['cast'] as List<Cast>;
+          final youtubeTrailer = movie.youtubeTrailer;
 
           return CustomScrollView(
             slivers: [
-              // Style App Bar with Backdrop
+              // Netflix Style App Bar with Backdrop
               SliverAppBar(
                 expandedHeight: 400,
                 flexibleSpace: FlexibleSpaceBar(
@@ -76,6 +80,15 @@ class _DetailScreenState extends State<DetailScreen> {
                               'https://image.tmdb.org/t/p/w780${movie.backdropPath}',
                               fit: BoxFit.cover,
                               width: double.infinity,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[800],
+                                  child: const Center(
+                                    child: Icon(Icons.movie,
+                                        size: 80, color: Colors.white54),
+                                  ),
+                                );
+                              },
                             )
                           : Container(
                               color: Colors.grey[800],
@@ -124,6 +137,30 @@ class _DetailScreenState extends State<DetailScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Consumer<FavoriteProvider>(
                       builder: (context, favoriteProvider, child) {
+                        final authProvider = context.read<AuthProvider>();
+
+                        if (!authProvider.isLoggedIn) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.favorite_border,
+                                  color: Colors.white),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('Please login to add favorites'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+
                         final isFavorite =
                             favoriteProvider.isMovieFavorite(movie.id);
                         return Container(
@@ -136,7 +173,9 @@ class _DetailScreenState extends State<DetailScreen> {
                               isFavorite
                                   ? Icons.favorite
                                   : Icons.favorite_border,
-                              color: isFavorite ? Colors.red : Colors.white,
+                              color: isFavorite
+                                  ? Colors.red
+                                  : const Color.fromARGB(255, 152, 57, 51),
                             ),
                             onPressed: () {
                               final favoriteMovie =
@@ -182,8 +221,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 fontFamily: 'Poppins',
                                 fontSize: 28,
                                 fontWeight: FontWeight.w700,
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 height: 1.2,
                               ),
                             ),
@@ -211,9 +249,8 @@ class _DetailScreenState extends State<DetailScreen> {
                                     fontFamily: 'Poppins',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -224,7 +261,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Release Date and Genre
+                      // Release Date
                       Row(
                         children: [
                           Icon(Icons.calendar_today,
@@ -239,7 +276,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               fontSize: 14,
                               color: Theme.of(context)
                                   .colorScheme
-                                  .onBackground
+                                  .onSurface
                                   .withOpacity(0.7),
                             ),
                           ),
@@ -248,6 +285,40 @@ class _DetailScreenState extends State<DetailScreen> {
 
                       const SizedBox(height: 24),
 
+                      // TRAILER SECTION
+                      if (youtubeTrailer != null) ...[
+                        YoutubePlayerWidget(video: youtubeTrailer),
+                        const SizedBox(height: 32),
+                      ] else ...[
+                        // Placeholder jika tidak ada trailer
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.videocam_off, color: primaryColor),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'No trailer available for this movie',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.7),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+
                       // Overview Section
                       Text(
                         'Overview',
@@ -255,7 +326,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           fontFamily: 'Poppins',
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onBackground,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -269,7 +340,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           height: 1.6,
                           color: Theme.of(context)
                               .colorScheme
-                              .onBackground
+                              .onSurface
                               .withOpacity(0.8),
                         ),
                       ),
@@ -284,7 +355,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             fontFamily: 'Poppins',
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onBackground,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -328,42 +399,48 @@ class _DetailScreenState extends State<DetailScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 30,
-                    color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 30,
+                  color: Colors.grey[300],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: 100,
+                  height: 20,
+                  color: Colors.grey[300],
+                ),
+                const SizedBox(height: 24),
+                // Shimmer untuk trailer
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: 100,
-                    height: 20,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: 80,
-                    height: 25,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 12),
-                  ...List.generate(
-                      4,
-                      (index) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Container(
-                              width: double.infinity,
-                              height: 16,
-                              color: Colors.white,
-                            ),
-                          )),
-                ],
-              ),
+                ),
+                const SizedBox(height: 32),
+                Container(
+                  width: 80,
+                  height: 25,
+                  color: Colors.grey[300],
+                ),
+                const SizedBox(height: 12),
+                ...List.generate(
+                    4,
+                    (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Container(
+                            width: double.infinity,
+                            height: 16,
+                            color: Colors.grey[300],
+                          ),
+                        )),
+              ],
             ),
           ),
         ),
@@ -384,7 +461,7 @@ class _DetailScreenState extends State<DetailScreen> {
               fontFamily: 'Poppins',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -424,7 +501,7 @@ class _DetailScreenState extends State<DetailScreen> {
               fontFamily: 'Poppins',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

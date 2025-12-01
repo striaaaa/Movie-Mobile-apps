@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController(viewportFraction: 0.8);
+  final TextEditingController _searchController = TextEditingController();
   int _currentPage = 0;
   Timer? _carouselTimer;
 
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _carouselTimer?.cancel();
     _pageController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -57,9 +59,60 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _navigateToSearch() {
+    if (_searchController.text.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SearchScreen(),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SearchScreen(),
+        ),
+      );
+    }
+  }
+
+  // CUSTOM LOGO WIDGET - Ganti dengan logo vector lu
+  Widget _buildCustomLogo() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // LOGO CONTAINER - Ganti dengan asset vector lu
+        Container(
+          width: 32, // Sesuaikan dengan ukuran logo lu
+          height: 32,
+          decoration: const BoxDecoration(
+            // === GANTI DENGAN LOGO LU ===
+            image: DecorationImage(
+              image: AssetImage('assets/images/vector.png'), // Path logo lu
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // APP NAME
+        // Text(
+        //   'anzFlix',
+        //   style: TextStyle(
+        //     fontFamily: 'Poppins',
+        //     fontSize: 20,
+        //     fontWeight: FontWeight.w700,
+        //     color: const Color(0xFF199EF3),
+        //   ),
+        // ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF199EF3);
+    const primaryColor = Color(0xFF199EF3);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -75,31 +128,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return CustomScrollView(
             slivers: [
-              // Netflix Style App Bar
+              // App Bar dengan Custom Logo
               SliverAppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Text(
-                  'SanzFlix',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: primaryColor,
-                  ),
-                ),
+                centerTitle: false,
+                title: _buildCustomLogo(), // Custom logo di sini
                 actions: [
+                  // Notification Icon
                   IconButton(
-                    icon: const Icon(Icons.search),
+                    icon: const Icon(Icons.notifications_outlined),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SearchScreen()),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Notifications feature coming soon!'),
+                          duration: Duration(seconds: 2),
+                        ),
                       );
                     },
                   ),
                 ],
+              ),
+
+              // SEARCH BAR SECTION - di atas carousel
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: _buildSearchBar(context),
+                ),
               ),
 
               // Hero Carousel Section
@@ -115,20 +172,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   _buildMovieSection(
                     context,
-                    'Trending Now',
-                    movieProvider.popularMovies,
+                    'Top 10 in Indonesia Today',
+                    movieProvider.popularMovies.take(10).toList(),
+                    showBackgroundRank: true,
                   ),
                   const SizedBox(height: 32),
                   _buildMovieSection(
                     context,
-                    'Top Rated',
-                    movieProvider.topRatedMovies,
+                    'Top Rated Movies',
+                    movieProvider.topRatedMovies.take(10).toList(),
+                    showRank: true,
                   ),
                   const SizedBox(height: 32),
                   _buildMovieSection(
                     context,
                     'Coming Soon',
                     movieProvider.upcomingMovies,
+                    showRank: false,
+                    showBackgroundRank: false,
                   ),
                   const SizedBox(height: 32),
                 ]),
@@ -140,11 +201,76 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // SEARCH BAR WIDGET - Netflix Style
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withOpacity(0.1),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search for movies, TV shows...',
+          hintStyle: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.7),
+          ),
+          border: InputBorder.none,
+          prefixIcon: Icon(
+            Icons.search,
+            color: Colors.white.withOpacity(0.8),
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : null,
+          contentPadding: const EdgeInsets.only(top: 10, bottom: 10),
+          alignLabelWithHint: true,
+          isDense: true,
+        ),
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          color: Colors.white,
+        ),
+        textAlignVertical: TextAlignVertical.center,
+        onTap: _navigateToSearch,
+        onSubmitted: (value) {
+          if (value.isNotEmpty) {
+            _navigateToSearch();
+          }
+        },
+      ),
+    );
+  }
+
   Widget _buildHeroCarousel(List<Movie> movies, BuildContext context) {
     final carouselMovies = movies.take(5).toList();
 
     return Column(
       children: [
+        const SizedBox(height: 8), // Sedikit spacing dari search bar
         SizedBox(
           height: 500,
           child: PageView.builder(
@@ -297,18 +423,24 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _currentPage == index
-                    ? const Color(0xFF199EF3)
+                    ? const Color.fromARGB(255, 39, 82, 129)
                     : Colors.grey.withOpacity(0.5),
               ),
             ),
           ),
         ),
+        const SizedBox(height: 8),
       ],
     );
   }
 
   Widget _buildMovieSection(
-      BuildContext context, String title, List<Movie> movies) {
+    BuildContext context,
+    String title,
+    List<Movie> movies, {
+    bool showRank = false,
+    bool showBackgroundRank = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -320,23 +452,28 @@ class _HomeScreenState extends State<HomeScreen> {
               fontFamily: 'Poppins',
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 200,
+            height: showBackgroundRank ? 180 : 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: movies.length,
               itemBuilder: (context, index) {
                 final movie = movies[index];
                 return Container(
-                  width: 120,
+                  width: showBackgroundRank ? 140 : 120,
                   margin: EdgeInsets.only(
                     right: index == movies.length - 1 ? 0 : 12,
                   ),
-                  child: MovieCard(movie: movie),
+                  child: MovieCard(
+                    movie: movie,
+                    rank: (showRank || showBackgroundRank) ? index + 1 : null,
+                    showRank: showRank,
+                    showBackgroundRank: showBackgroundRank,
+                  ),
                 );
               },
             ),
@@ -349,11 +486,59 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildShimmerLoading() {
     return CustomScrollView(
       slivers: [
-        const SliverAppBar(
+        // App Bar Shimmer dengan Custom Logo
+        SliverAppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: Text('SanzFlix'),
+          centerTitle: false,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 80,
+                height: 20,
+                color: Colors.grey[300],
+              ),
+            ],
+          ),
+          actions: [
+            Container(
+              width: 24,
+              height: 24,
+              margin: const EdgeInsets.all(8),
+              color: Colors.grey[300],
+            ),
+          ],
         ),
+
+        // Search Bar Shimmer
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // Carousel Shimmer
         SliverToBoxAdapter(
           child: Shimmer.fromColors(
             baseColor: Colors.grey[300]!,
@@ -370,37 +555,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 32),
                 ...List.generate(
-                    3,
-                    (index) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 150,
-                                height: 20,
+                  3,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 150,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 200,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: 5,
+                            itemBuilder: (context, index) => Container(
+                              width: 120,
+                              margin: const EdgeInsets.only(right: 12),
+                              decoration: BoxDecoration(
                                 color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 200,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: 5,
-                                  itemBuilder: (context, index) => Container(
-                                    width: 120,
-                                    margin: const EdgeInsets.only(right: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        )),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -410,8 +596,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildErrorState(MovieProvider movieProvider, BuildContext context) {
-    return Center(
-      child: Column(
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
@@ -422,7 +609,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontFamily: 'Poppins',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -433,8 +620,7 @@ class _HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Poppins',
-                color:
-                    Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ),
@@ -442,7 +628,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () => movieProvider.loadAllMovies(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF199EF3),
+              backgroundColor: const Color.fromARGB(255, 243, 25, 25),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

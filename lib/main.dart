@@ -4,10 +4,11 @@ import 'package:provider/provider.dart';
 import 'providers/movie_provider.dart';
 import 'providers/favorite_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/auth_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/search_screen.dart';
 import 'screens/favorite_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,9 +21,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MovieProvider()),
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => MovieProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, FavoriteProvider>(
+          create: (context) => FavoriteProvider(context.read<AuthProvider>()),
+          update: (context, authProvider, favoriteProvider) {
+            return FavoriteProvider(authProvider);
+          },
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -32,7 +39,7 @@ class MyApp extends StatelessWidget {
             darkTheme: _buildDarkTheme(),
             themeMode:
                 themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-            home: const MainNavigation(),
+            home: const AuthWrapper(),
             debugShowCheckedModeBanner: false,
           );
         },
@@ -41,133 +48,136 @@ class MyApp extends StatelessWidget {
   }
 
   ThemeData _buildLightTheme() {
-    final Color primaryColor = const Color(0xFF199EF3);
-
+    const primary = Color(0xFF199EF3);
     return ThemeData(
-      primaryColor: primaryColor,
-      colorScheme: ColorScheme.light(
-        primary: primaryColor,
-        secondary: primaryColor.withOpacity(0.8),
-      ),
-      fontFamily: 'Poppins',
+      brightness: Brightness.light,
+      primaryColor: primary,
+      colorScheme: ColorScheme.fromSeed(
+          seedColor: primary, brightness: Brightness.light),
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         titleTextStyle: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: Colors.black,
-        ),
-      ),
-      textTheme: const TextTheme(
-        displayLarge:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700),
-        displayMedium:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        displaySmall:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        headlineMedium:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        headlineSmall:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        titleLarge:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        titleMedium:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-        titleSmall:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-        bodyLarge:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400),
-        bodyMedium:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400),
-        bodySmall:
-            TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400),
-      ),
-    );
-  }
-
-  ThemeData _buildDarkTheme() {
-    final Color primaryColor = const Color(0xFF199EF3);
-
-    return ThemeData(
-      primaryColor: primaryColor,
-      colorScheme: const ColorScheme.dark(
-        primary: Color(0xFF199EF3),
-        secondary: Color(0xFF199EF3),
-        surface: Color(0xFF121212),
-        background: Color(0xFF121212),
-      ),
-      fontFamily: 'Poppins',
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1E1E1E),
-        elevation: 0,
-        titleTextStyle: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
       ),
-      cardTheme: CardThemeData(
-        color: const Color(0xFF1E1E1E),
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+      cardColor: Colors.white,
       textTheme: const TextTheme(
-        displayLarge: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w700,
-            color: Colors.white),
-        displayMedium: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white),
-        displaySmall: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white),
-        headlineMedium: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white),
-        headlineSmall: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white),
-        titleLarge: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white),
-        titleMedium: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-            color: Colors.white),
-        titleSmall: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-            color: Colors.white),
-        bodyLarge: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w400,
-            color: Colors.white),
-        bodyMedium: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w400,
-            color: Colors.white70),
-        bodySmall: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w400,
-            color: Colors.white60),
+        bodyLarge: TextStyle(fontFamily: 'Poppins'),
+        bodyMedium: TextStyle(fontFamily: 'Poppins'),
+      ),
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    const primary = Color(0xFF199EF3);
+    return ThemeData(
+      brightness: Brightness.dark,
+      primaryColor: primary,
+      colorScheme:
+          ColorScheme.fromSeed(seedColor: primary, brightness: Brightness.dark),
+      scaffoldBackgroundColor: const Color(0xFF0B0F19),
+      appBarTheme: AppBarTheme(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+      cardColor: const Color(0xFF111827),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(fontFamily: 'Poppins'),
+        bodyMedium: TextStyle(fontFamily: 'Poppins'),
       ),
     );
   }
 }
 
-// MainNavigation
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({Key? key}) : super(key: key);
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().checkAuthStatus().then((_) {
+        if (context.read<AuthProvider>().isLoggedIn) {
+          context.read<FavoriteProvider>().loadFavorites();
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        if (authProvider.isLoading) {
+          return _buildLoadingScreen();
+        }
+
+        if (!authProvider.isLoggedIn) {
+          return LoginScreen(
+            onLoginSuccess: () {
+              context.read<FavoriteProvider>().loadFavorites();
+            },
+          );
+        }
+
+        return const MainNavigation();
+      },
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.movie_rounded,
+              size: 80,
+              color: Color(0xFF199EF3),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'MovieFlix',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF199EF3),
+              ),
+            ),
+            SizedBox(height: 20),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Color(0xFF199EF3)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Main Navigation (tetap sama, tapi dengan logout functionality)
 class MainNavigation extends StatefulWidget {
   const MainNavigation({Key? key}) : super(key: key);
 
@@ -178,13 +188,6 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const FavoritesScreen(),
-    const SettingsScreen(),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -193,9 +196,15 @@ class _MainNavigationState extends State<MainNavigation> {
     });
   }
 
+  List<Widget> get _screens => [
+        const HomeScreen(),
+        const FavoritesScreen(),
+        const SettingsScreen(),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF199EF3);
+    const primaryColor = Color(0xFF199EF3);
 
     return Scaffold(
       body: _screens[_currentIndex],
@@ -223,10 +232,6 @@ class _MainNavigationState extends State<MainNavigation> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Search',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite),
