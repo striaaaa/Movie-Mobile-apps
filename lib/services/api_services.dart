@@ -5,6 +5,7 @@ import '../models/cast_model.dart';
 class ApiService {
   final Dio _dio = Dio();
   final String _baseUrl = 'https://api.themoviedb.org/3';
+  final String _baseUrl2 = 'http://127.0.0.1:8000/api/watchlist/';
   final String _apiKey = 'dd04310045c6e1d96bd35eaa2dc8e64e';
 
   ApiService() {

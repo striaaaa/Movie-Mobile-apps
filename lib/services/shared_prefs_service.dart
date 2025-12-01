@@ -36,13 +36,10 @@ class SharedPrefsService {
       await _saveFavoritesList(favorites);
     }
   }
-
   static Future<List<FavoriteMovie>> getFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_favoritesKey);
-
     if (jsonString == null) return [];
-
     try {
       final List<dynamic> jsonList = json.decode(jsonString);
       return jsonList.map((json) => FavoriteMovie.fromJson(json)).toList();
