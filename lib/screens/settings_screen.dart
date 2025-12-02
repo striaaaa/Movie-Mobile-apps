@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/shared_prefs_service.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -8,13 +9,29 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF30E9FE), // #30E9FE
+                Color(0xFF0D0552), // #0D0552
+              ],
+            ),
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // User Info Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -22,31 +39,72 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Movie Browser',
+                    'Account',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Version 1.0.0',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                  const SizedBox(height: 16),
+                  ListTile(
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.person),
                     ),
+                    title: Text(
+                      currentUser?.name ?? 'User',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(currentUser?.email ?? ''),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Flutter Mobile App for Tugas Besar',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Logout'),
+                            content:
+                                const Text('Are you sure you want to logout?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  authProvider.logout();
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: const Text('Logout'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      child: const Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
+
           const SizedBox(height: 16),
+
+          // Preferences Section
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -110,31 +168,34 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(height: 16),
+
+          // About Section
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'About',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   ListTile(
-                    leading: const Icon(Icons.api),
-                    title: const Text('API Source'),
-                    subtitle: const Text('The Movie Database (TMDB)'),
+                    leading: Icon(Icons.api),
+                    title: Text('API Source'),
+                    subtitle: Text('The Movie Database (TMDB)'),
                   ),
-                  const Divider(),
+                  Divider(),
                   ListTile(
-                    leading: const Icon(Icons.code),
-                    title: const Text('Developer'),
-                    subtitle: const Text('Flutter - Tugas Besar Mobile'),
+                    leading: Icon(Icons.code),
+                    title: Text('Developer'),
+                    subtitle: Text('SanzFlix Team'),
                   ),
                 ],
               ),

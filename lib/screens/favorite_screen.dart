@@ -74,6 +74,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorite Movies'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF30E9FE), // #30E9FE
+                Color(0xFF0D0552), // #0D0552
+              ],
+            ),
+          ),
+        ),
         actions: [
           Consumer<FavoriteProvider>(
             builder: (context, favoriteProvider, child) {
