@@ -149,39 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         secondary: const Icon(Icons.dark_mode),
                       );
                     },
-                  ),
-                  const Divider(),
-                  FutureBuilder<int?>(
-                    future: SharedPrefsService.getLastViewedMovieId(),
-                    builder: (context, snapshot) {
-                      final lastViewedId = snapshot.data;
-                      return ListTile(
-                        leading: const Icon(Icons.history),
-                        title: const Text('Last Viewed Movie'),
-                        subtitle: Text(
-                          lastViewedId != null
-                              ? 'Movie ID: $lastViewedId'
-                              : 'No recently viewed movies',
-                        ),
-                        trailing: lastViewedId != null
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () async {
-                                  await SharedPrefsService.setLastViewedMovieId(
-                                      0);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Cleared last viewed movie')),
-                                    );
-                                  }
-                                },
-                              )
-                            : null,
-                      );
-                    },
-                  ),
+                  ), 
                 ],
               ),
             ),
