@@ -1,9 +1,13 @@
 import 'package:flutter/foundation.dart';
-import '../models/user_model.dart';
+import 'package:movie_browser_app/services/api_services.dart';
+// import '../models/user_model.dart';
+
+import '../models/userModel.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final ApiService _apiService = ApiService();
 
   User? _currentUser;
   bool _isLoading = false;
@@ -13,15 +17,40 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isLoggedIn => _currentUser != null;
+  
+  Future<User?> getUser() async {
+    _isLoading = true;
+    notifyListeners();
 
-  // Login user dengan better error handling
+    try {
+      // final user = await _authService.getCurrentUser();
+      final user = await _apiService.getCurrentUserLogin();
+      if (user != null) {
+        _currentUser = user; 
+        print(user);
+        notifyListeners();
+        return _currentUser;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Get user error: $e');
+      }
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> login(String email, String password) async {
+    print('ini login prv');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final user = await _authService.login(email, password);
+      final user = await _apiService.login(email, password);
       if (user != null) {
         _currentUser = user;
         _isLoading = false;
@@ -48,7 +77,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = await _authService.register(email, password, name);
+      final user = await _apiService.register(email, password, name);
       if (user != null) {
         _currentUser = user;
         _isLoading = false;
@@ -70,28 +99,28 @@ class AuthProvider with ChangeNotifier {
 
   // Logout
   Future<void> logout() async {
-    await _authService.logout();
+    await _apiService.logout();
     _currentUser = null;
     notifyListeners();
   }
 
-  // Check if user is logged in on app start
-  Future<void> checkAuthStatus() async {
-    _isLoading = true;
-    notifyListeners();
+  // // Check if user is logged in on app start
+  // Future<void> checkAuthStatus() async {
+  //   _isLoading = true;
+  //   notifyListeners();
 
-    try {
-      final user = await _authService.getCurrentUser();
-      _currentUser = user;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Auth check error: $e');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  //   try {
+  //     final user = await _authService.getCurrentUser();
+  //     _currentUser = user;
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Auth check error: $e');
+  //     }
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
 
   // Clear error
   void clearError() {

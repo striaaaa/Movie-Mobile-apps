@@ -49,9 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       success = await authProvider.register(
+        _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
-        _nameController.text.trim(),
       );
     }
 
@@ -82,14 +82,14 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Logo & Title
               const SizedBox(height: 60),
-              Icon(
-                Icons.movie_rounded,
-                size: 80,
-                color: primaryColor,
+              Image.asset(
+                'assets/images/vector.png',
+                width: 80,
+                height: 80,
               ),
               const SizedBox(height: 16),
               Text(
-                'MovieFlix',
+                'SanzFlix',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 32,
@@ -313,39 +313,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       // Demo Credentials Hint
-                      if (_isLogin) ...[
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border:
-                                Border.all(color: Colors.blue.withOpacity(0.3)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Demo Credentials:',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                  color: primaryColor,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Email: demo@demo.com\nPassword: password',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      // if (_isLogin) ...[
+                      //   const SizedBox(height: 20),
+                      //   Container(
+                      //     padding: const EdgeInsets.all(12),
+                      //     decoration: BoxDecoration(
+                      //       color: Colors.blue.withOpacity(0.1),
+                      //       borderRadius: BorderRadius.circular(8),
+                      //       border:
+                      //           Border.all(color: Colors.blue.withOpacity(0.3)),
+                      //     ),
+                      //     child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Text(
+                      //           'Demo Credentials:',
+                      //           style: TextStyle(
+                      //             fontFamily: 'Poppins',
+                      //             fontWeight: FontWeight.w600,
+                      //             color: primaryColor,
+                      //           ),
+                      //         ),
+                      //         const SizedBox(height: 4),
+                      //         const Text(
+                      //           'Email: demo@demo.com\nPassword: password',
+                      //           style: TextStyle(
+                      //             fontFamily: 'Poppins',
+                      //             fontSize: 12,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ],
                     ],
                   ),
                 ),
