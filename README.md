@@ -3,10 +3,10 @@
 
 # 📁 README.md — FRONTEND (Flutter)
 
-# 🎬 Movie Watchlist App
+# 🎬 SanzFlix Movielist App
 Flutter + TMDB API
 
-Aplikasi mobile **Movie Watchlist** berbasis Flutter untuk menampilkan, mencari, dan menyimpan movie favorit pengguna.  
+Aplikasi mobile **SanzFlix Movielist App** berbasis Flutter untuk menampilkan, mencari, dan menyimpan movie favorit pengguna.  
 Aplikasi ini terintegrasi dengan **TMDB API** dan **Laravel REST API**.
 
 ---
@@ -19,7 +19,7 @@ Aplikasi ini terintegrasi dengan **TMDB API** dan **Laravel REST API**.
 ---
 
 ## 📞 Contact Information 1
-- Email   : your-email@example.com
+- Email   : satriasahrul2@gmail.com
 - GitHub  : https://github.com/striaaaa
 - Project : Movie Watchlist 
 
