@@ -4,12 +4,30 @@ import '../providers/theme_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/shared_prefs_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Panggil getUser() saat halaman dibuka
+    // final authProvider = context.read<AuthProvider>();
+    // authProvider.getUser(); 
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //   if (!mounted) return;
+  //   context.read<AuthProvider>().getUser();
+  // });
+  }
+  @override
   Widget build(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
+    
+    final authProvider = context.read<AuthProvider>();// 
     final currentUser = authProvider.currentUser;
 
     return Scaffold(
@@ -131,39 +149,7 @@ class SettingsScreen extends StatelessWidget {
                         secondary: const Icon(Icons.dark_mode),
                       );
                     },
-                  ),
-                  const Divider(),
-                  FutureBuilder<int?>(
-                    future: SharedPrefsService.getLastViewedMovieId(),
-                    builder: (context, snapshot) {
-                      final lastViewedId = snapshot.data;
-                      return ListTile(
-                        leading: const Icon(Icons.history),
-                        title: const Text('Last Viewed Movie'),
-                        subtitle: Text(
-                          lastViewedId != null
-                              ? 'Movie ID: $lastViewedId'
-                              : 'No recently viewed movies',
-                        ),
-                        trailing: lastViewedId != null
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () async {
-                                  await SharedPrefsService.setLastViewedMovieId(
-                                      0);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Cleared last viewed movie')),
-                                    );
-                                  }
-                                },
-                              )
-                            : null,
-                      );
-                    },
-                  ),
+                  ), 
                 ],
               ),
             ),

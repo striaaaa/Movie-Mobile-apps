@@ -115,7 +115,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().checkAuthStatus().then((_) {
+      context.read<AuthProvider>().getUser().then((_) {
         if (context.read<AuthProvider>().isLoggedIn) {
           context.read<FavoriteProvider>().loadFavorites();
         }
@@ -147,18 +147,18 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget _buildLoadingScreen() {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.movie_rounded,
-              size: 80,
-              color: Color(0xFF199EF3),
-            ),
+             Image.asset(
+                'assets/images/vector.png',
+                width: 80,
+                height: 80,
+              ),
             SizedBox(height: 20),
             Text(
-              'MovieFlix',
+              'SanzFlix',
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 32,

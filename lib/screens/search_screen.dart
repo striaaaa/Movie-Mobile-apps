@@ -37,50 +37,56 @@ class _SearchScreenState extends State<SearchScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Container(
+     appBar: AppBar(
+  toolbarHeight: 70,
+  backgroundColor: Colors.transparent,
+  flexibleSpace: SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Center(
+        child: Container(
           height: 45,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search movies...',
-              hintStyle: TextStyle(
-                fontFamily: 'Poppins',
-                color: Theme.of(context).hintColor,
-              ),
-              border: InputBorder.none,
-              prefixIcon: Icon(Icons.search, color: primaryColor),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () {
-                        _searchController.clear();
-                        context.read<MovieProvider>().clearSearch();
-                      },
-                    )
-                  : null,
-            ),
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-            onChanged: _onSearchChanged,
-          ),
+        child:TextField(
+  controller: _searchController,
+  onChanged: _onSearchChanged, // 🔥 INI YANG HILANG
+  decoration: InputDecoration(
+    filled: true,
+    fillColor: Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF1E1E1E)
+        : Colors.white,
+    hintText: 'Search movies...',
+    hintStyle: TextStyle(
+      color: Theme.of(context).hintColor,
+      fontFamily: 'Poppins',
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+    prefixIcon: Icon(Icons.search, color: primaryColor),
+    suffixIcon: _searchController.text.isNotEmpty
+        ? IconButton(
+            icon: const Icon(Icons.clear, color: Colors.grey),
+            onPressed: () {
+              _searchController.clear();
+              context.read<MovieProvider>().clearSearch();
+            },
+          )
+        : null,
+  ),
+),
+
+
         ),
       ),
+    ),
+  ),
+),
+
       body: Consumer<MovieProvider>(
         builder: (context, movieProvider, child) {
           if (movieProvider.isSearching) {

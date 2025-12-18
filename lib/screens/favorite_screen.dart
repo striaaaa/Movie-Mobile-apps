@@ -42,14 +42,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final newRating = double.tryParse(ratingController.text);
               if (newRating != null && newRating >= 0 && newRating <= 10) {
-                context.read<FavoriteProvider>().updateFavorite(
+               await context.read<FavoriteProvider>().updateFavorite(
+                      favorite.id,
                       favorite.copyWith(newRating: newRating),
                     );
                 Navigator.pop(context);
-
+ 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                       content: Text('Updated rating for ${favorite.title}')),

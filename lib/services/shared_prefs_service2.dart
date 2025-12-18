@@ -1,17 +1,35 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/favorite_model.dart';
 import 'dart:convert';
+
 class SharedPrefsService {
-  // ====== KEYS ======
-  static const String _accessTokenKey = 'access_token';
-  static const String _refreshTokenKey = 'refresh_token';
-    static String _getUserFavoritesKey(int userId) {
+  // Auth related keys
+  static const String _currentUserKey = 'currentUser';
+  static const String _usersKey = 'users';
+
+  // User-specific favorite keys will be generated dynamically
+  static String _getUserFavoritesKey(int userId) {
     return 'favorites_$userId';
   }
 
+  // === AUTH METHODS ===
 
+  static Future<void> setString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
 
+  static Future<String?> getString(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
 
+  static Future<void> remove(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
+  // === THEME & SETTINGS (Global) ===
 
   static Future<bool> getIsDarkTheme() async {
     final prefs = await SharedPreferences.getInstance();
@@ -32,51 +50,6 @@ class SharedPrefsService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('lastViewedMovieId', movieId);
   }
-  // ====== GENERIC STRING METHODS ======
-  static Future<void> setString(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, value);
-  }
-
-  static Future<String?> getString(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(key);
-  }
-
-  static Future<void> remove(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(key);
-  }
- 
-  static Future<void>   setAccessToken(String token) async {
-    await setString(_accessTokenKey, token);
-  }
-
-  static Future<String?> getAccessToken() async {
-    return getString(_accessTokenKey);
-  }
-
-  static Future<void> removeAccessToken() async {
-    await remove(_accessTokenKey);
-  }
-
-  static Future<void> setRefreshToken(String token) async {
-    await setString(_refreshTokenKey, token);
-  }
-
-  static Future<String?> getRefreshToken() async {
-    return getString(_refreshTokenKey);
-  }
-
-  static Future<void> removeRefreshToken() async {
-    await remove(_refreshTokenKey);
-  }
-
-  // ====== CLEAR ALL ======
-  static Future<void> clearAll() async {
-    await removeAccessToken();
-    await removeRefreshToken();
-  } 
 
   // === FAVORITES (User-specific) ===
 
@@ -129,7 +102,8 @@ class SharedPrefsService {
     return favorites.any((fav) => fav.id == movieId);
   }
 
-   static Future<void> _saveFavoritesList(
+  // Helper method to save favorites list
+  static Future<void> _saveFavoritesList(
       int userId, List<FavoriteMovie> favorites) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = favorites.map((movie) => movie.toJson()).toList();
