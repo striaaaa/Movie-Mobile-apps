@@ -18,6 +18,28 @@ Aplikasi ini terintegrasi dengan **TMDB API** dan **Laravel REST API**.
 
 ---
 
+## 📞 Contact Information 1
+- Email   : your-email@example.com
+- GitHub  : https://github.com/striaaaa
+- Project : Movie Watchlist 
+
+## 📞 Contact Information 2
+- Email   : izanagifarisaslam5@gmail.com
+- GitHub  : https://github.com/Izanagi05
+- Project : Movie Watchlist 
+
+## 📞 Contact Information 3
+- Email   : sunmkjun11@gmail.com
+- GitHub  : https://github.com/sjun11
+- Project : Movie Watchlist 
+
+---
+
+## 🔗 Repository Terkait
+- Frontend (Flutter): https://github.com/striaaaa/Movie-Mobile-apps
+- Backend (Laravel): https://github.com/Izanagi05/movies_api
+
+---
 
 ## 🛠️ Spesifikasi Frontend
 
